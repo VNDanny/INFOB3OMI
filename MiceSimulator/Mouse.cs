@@ -26,7 +26,7 @@ namespace MiceSimulator
             this.age = 0;
         }
 
-        public void move(Point dir)
+        public void move(Point dir, Size sz)
         {
             if(dir.X != 0 && dir.Y != 0)
             {
@@ -38,6 +38,15 @@ namespace MiceSimulator
                 this.position.X += dir.X * 10;
                 this.position.Y += dir.Y * 10;
             }
+
+            if(this.position.X < 0)
+                this.position.X = 0;
+            else if(this.position.X > sz.Width)
+                this.position.X = sz.Width;
+            if (this.position.Y < 0)
+                this.position.Y = 0;
+            else if (this.position.Y > sz.Height)
+                this.position.Y = sz.Height;
         }
     }
 }
