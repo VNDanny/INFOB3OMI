@@ -12,26 +12,42 @@ namespace MiceSimulator
 {
     public partial class Form1 : Form
     {
-        public int hoDoMaMice;
-        public int heDoMaMice;
-        public int hoReMaMice;
-        public int hoDoFeMice;
-        public int heDoFeMice;
-        public int hoReFeMice;
-        public int initialPredators;
-        public bool predatationON;
-        public int chanceOfPredatationLight;
-        public int chanceOfPredatationDark;
-        public int offSpring;
-        public int chanceOfProcreationLight;
-        public int chanceOfProcreationDark;
+        public int hoDoMaMice = 20;
+        public int heDoMaMice = 20;
+        public int hoReMaMice = 40;
+        public int hoDoFeMice = 20;
+        public int heDoFeMice = 20;
+        public int hoReFeMice = 40;
+        public int initialPredators = 10;
+
+
+        public bool predatationON = true;
+        public int chanceOfPredatationLight = 80;
+        public int chanceOfPredatationDark = 60;
+
+
+        public int offSpring = 4;
+        public int chanceOfProcreationLight = 100;
+        public int chanceOfProcreationDark = 20;
+        public int chanceofProcreationBoth = 50;
+
+        public int breedingCount = 0;
+        public int predatationWhite = 0;
+        public int predatationBlack = 0;
+        public int oldAgeWhite = 0;
+        public int oldAgeBlack = 0;
+        public int procreationDeathsWhite = 0;
+        public int procreationDeathsBlack = 0;
+
+
         public List<Mouse> mice;
         public List<Predator> predators;
-        public bool goOn;
+
+        public bool goOn = false;
         public int time;
         public Size formSize;
 
-        public Random rd;
+        public Random rd = new Random();
         public Label timeStamp = new Label();
 
         public Form1()
@@ -94,9 +110,6 @@ namespace MiceSimulator
             mice = new List<Mouse>();
             predators = new List<Predator>();
 
-            hoDoMaMice = 10;
-
-            rd = new Random();
             for (int i = 0; i < hoDoMaMice; i++)
             {            
                 mice.Add(new Mouse(true, "AA", new Point(rd.Next(0, Screen.PrimaryScreen.Bounds.Size.Width), rd.Next(0, Screen.PrimaryScreen.Bounds.Size.Height))));
@@ -121,6 +134,13 @@ namespace MiceSimulator
             {
                 mice.Add(new Mouse(false, "aa", new Point(rd.Next(0, Screen.PrimaryScreen.Bounds.Size.Width), rd.Next(0, Screen.PrimaryScreen.Bounds.Size.Height))));
             }
+            if (predatationON)
+            {
+                for (int i = 0; i < initialPredators; i++)
+                {
+                    predators.Add(new Predator(new Point(rd.Next(0, Screen.PrimaryScreen.Bounds.Size.Width), rd.Next(0, Screen.PrimaryScreen.Bounds.Size.Height))));
+                }
+            }
         }
 
         public void buttonPress(object o, KeyEventArgs e)
@@ -136,7 +156,7 @@ namespace MiceSimulator
             Graphics g = pea.Graphics;
             foreach(Predator p in predators)
             {
-                g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(new Point(p.position.X-3, p.position.Y-3), new Size(6,6)));
+                g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(new Point(p.position.X-5, p.position.Y-5), new Size(10,10)));
             }
             foreach(Mouse m in mice)
             {
@@ -151,7 +171,7 @@ namespace MiceSimulator
                     b = new SolidBrush(Color.White);
                 }
 
-                g.FillEllipse(b, new Rectangle(new Point(m.position.X - 2, m.position.Y - 2), new Size(4, 4)));
+                g.FillEllipse(b, new Rectangle(new Point(m.position.X - 4, m.position.Y - 4), new Size(8, 8)));
 
             }
 
@@ -162,10 +182,20 @@ namespace MiceSimulator
 
         public void openStatistics(object sender, EventArgs e)
         {
-            Form stat = new Form();
-            stat.Size = new Size(800, 800);
-
-            stat.Show();
+            /* public int breedingCount = 0;
+        public int predatationWhite = 0;
+        public int predatationBlack = 0;
+        public int oldAgeWhite = 0;
+        public int oldAgeBlack = 0;
+        public int procreationDeaths = 0; */
+        System.Windows.Forms.MessageBox.Show(
+            "Breeding Count: " + breedingCount.ToString() + 
+            "\npredatationWhite: " + predatationWhite.ToString() + 
+            "\npredatationBlack: " + predatationBlack.ToString() + 
+            "\n oldAgeWhite: " + oldAgeWhite.ToString() + 
+            "\n oldAgeBlack: " + oldAgeBlack.ToString() + 
+            "\n procreationDeathsWhite: " + procreationDeathsWhite.ToString() + 
+            "\n procreationDeathsBlack: " + procreationDeathsBlack.ToString());
         }
 
         public void OneCycle(object sender, EventArgs e)
@@ -176,26 +206,28 @@ namespace MiceSimulator
 
         public void ManyCycle(object sender, EventArgs e)
         {
-            if (!goOn)
+            goOn = !goOn;
+            while(goOn)
             {
-                goOn = true;
-                while (goOn)
-                {
-                    OneCycle(sender, e);
-                    System.Threading.Thread.Sleep(2000);
-                }
+                cycle();
+                this.Invalidate();
+                Application.DoEvents();
+                System.Threading.Thread.Sleep(1000);
             }
-            else
-                goOn = false;
             
         }
 
         public void cycle()
         {
             giveMiceDirection();
-            givePredatorsDirection();
             ageMice();
-            predationPhase();
+
+            if (predatationON)
+            {
+                givePredatorsDirection();
+                predationPhase();
+            }
+
             breedingPhase();
             eliminateOldGeneration();
             time++;
@@ -213,11 +245,10 @@ namespace MiceSimulator
         {
             int xDir;
             int yDir;
-            foreach(Mouse m in mice)
-            {
-                rd = new Random();
-                xDir = rd.Next(-1, 1);
-                yDir = rd.Next(-1, 1);
+            foreach (Mouse m in mice)
+            {              
+                xDir = rd.Next(-1, 2);
+                yDir = rd.Next(-1, 2);
                 m.move(new Point(xDir, yDir), this.Size);
             }
         }
@@ -227,10 +258,9 @@ namespace MiceSimulator
             int xDir;
             int yDir;
             foreach (Predator p in predators)
-            {
-                rd = new Random();
-                xDir = rd.Next(-1, 1);
-                yDir = rd.Next(-1, 1);
+            {              
+                xDir = rd.Next(-1, 2);
+                yDir = rd.Next(-1, 2);
                 p.move(new Point(xDir, yDir), this.Size);
             }
         }
@@ -239,14 +269,22 @@ namespace MiceSimulator
         {
             foreach(Predator p in predators)
             {
-                foreach(Mouse m in mice)
+                for (int i = mice.Count - 1; i >= 0; i--)
                 {
-                    double distance = Math.Sqrt((Math.Pow(p.position.X - m.position.X, 2) + Math.Pow(p.position.Y - m.position.Y, 2)));
+                    double distance = Math.Sqrt((Math.Pow(p.position.X - mice[i].position.X, 2) + Math.Pow(p.position.Y - mice[i].position.Y, 2)));
                     if (distance <= 50)
                     {
-                        if (predation(m))
+                        if (predation(mice[i]))
                         {
-                            mice.Remove(m);
+                            if (mice[i].genoType[0] == 'A')
+                            {
+                                predatationBlack++;
+                            }
+                            else
+                            {
+                                predatationWhite++;
+                            }
+                            mice.Remove(mice[i]);
                         }
                     }
                 }
@@ -260,26 +298,53 @@ namespace MiceSimulator
         {
             Mouse partner;
             bool success;
-            foreach (Mouse m in mice)
+            for (int i = mice.Count - 1; i >= 0; i--)
             {
-                if (!m.gender)
+                if (!mice[i].gender && mice[i].age > 3)
                 {
-                    partner = findEncounter(m);
+                    partner = findEncounter(mice[i]);
                     if (partner != null)
                     {
-                        rd = new Random();
-                        if(partner.genoType[0] == 'A')
+                        if (partner.genoType[0] == 'A' && mice[i].genoType[0] == 'A')
                         {
                             success = breeding(chanceOfProcreationDark);
+                        }
+                        else if (partner.genoType[0] == 'a' && mice[i].genoType[0] == 'a')
+                        {
+                            success = breeding(chanceOfProcreationLight);
                         }
                         else
                         {
                             success = breeding(chanceOfProcreationLight);
                         }
 
+
                         if (success)
                         {
-                            procreate(m, partner);
+                            procreate(mice[i], partner);
+
+                            if (mice[i].genoType[0] == 'A')
+                            {
+                                procreationDeathsBlack++;
+                            }
+                            else
+                            {
+                                procreationDeathsWhite++;
+                            }
+
+                            if (partner.genoType[0] == 'A')
+                            {
+                                procreationDeathsBlack++;
+                            }
+                            else
+                            {
+                                procreationDeathsWhite++;
+                            }
+
+                            mice.RemoveAt(i);
+                            mice.Remove(partner);
+
+                            breedingCount = breedingCount + offSpring;
                         }
                     }
                 }
@@ -290,7 +355,7 @@ namespace MiceSimulator
         {
             foreach (Mouse m in mice)
             {
-                if (m.gender)
+                if (m.gender && m.age > 3)
                 {
                     double distance = Math.Sqrt((Math.Pow(mouse.position.X - m.position.X, 2) + Math.Pow(mouse.position.Y - m.position.Y, 2)));
                     if (distance <= 50)
@@ -302,8 +367,7 @@ namespace MiceSimulator
 
         public bool breeding(int breedingChance) //calculate breeding chance, return true when breeding, false if not.
         {
-            rd = new Random();
-            if (breedingChance <= rd.Next(1, 100))
+            if (breedingChance >= rd.Next(1, 100))
             {
                 return true;
             }
@@ -321,22 +385,21 @@ namespace MiceSimulator
             char firstAllele;
             char secondAllele;
             string genoType;
-            
+
             for (int x = 0; x < offSpring; x++)
-            {
-                rd = new Random();
-                if (rd.Next(1, 2) == 1)
+            { 
+                if (rd.Next(1, 3) == 1)
                     gender = true; //male
                 else
                     gender = false; //female
 
-                if(rd.Next(1, 2) == 1)
+                if(rd.Next(1, 3) == 1)
                     firstAllele = mouse1.genoType[0];
                 else
                     firstAllele = mouse1.genoType[1];
 
 
-                if (rd.Next(1, 2) == 1)
+                if (rd.Next(1, 3) == 1)
                     secondAllele = mouse2.genoType[0];
                 else
                     secondAllele = mouse2.genoType[1];
@@ -349,34 +412,45 @@ namespace MiceSimulator
                 genoType = new string(firstAllele, secondAllele);
 
                 newMouse = new Mouse(gender, genoType, mouse1.position);
+
                 mice.Add(newMouse);
+
+
             }
         }
 
 
         public void eliminateOldGeneration() //eleminates old generation of mice.
         {
-            foreach (Mouse m in mice)
+            for (int i = mice.Count - 1; i>=0; i--)
             {
-                if(m.age >= 10)
+                if(mice[i].age >= 10)
                 {
-                    rd = new Random();
-                    if ( 50 + (m.age - 10) * 5 <= rd.Next(1,100))
-                        mice.Remove(m);
+                    if (50 + (mice[i].age - 10) * 5 >= rd.Next(1, 100))
+                    {
+                        if (mice[i].genoType[0] == 'A')
+                        {
+                            oldAgeBlack++;
+                        }
+                        else
+                        {
+                            oldAgeWhite++;
+                        }
+                        mice.RemoveAt(i);
+                    }
                 }
             }
         }
 
         public bool predation(Mouse mouse)
         {
-            rd = new Random();
             int predationChance;
             if (mouse.genoType[0] == 'A')
                 predationChance = chanceOfPredatationDark;
             else
                 predationChance = chanceOfPredatationLight;
 
-            if (predationChance <= rd.Next(1, 100))
+            if (predationChance >= rd.Next(1, 100))
             {
                 return true;
             }

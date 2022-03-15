@@ -20,13 +20,13 @@ namespace MiceSimulator
         {
             if (dir.X != 0 && dir.Y != 0)
             {
-                this.position.X += dir.X * 7;
-                this.position.Y += dir.Y * 7;
+                this.position.X += dir.X * 71;
+                this.position.Y += dir.Y * 71;
             }
             else
             {
-                this.position.X += dir.X * 10;
-                this.position.Y += dir.Y * 10;
+                this.position.X += dir.X * 100;
+                this.position.Y += dir.Y * 100;
             }
 
             if (this.position.X < 0)
