@@ -44,11 +44,15 @@ namespace MiceSimulator
         public List<Predator> predators;
 
         public bool goOn = false;
+        public bool stealth = false;
         public int time;
         public Size formSize;
 
         public Random rd = new Random();
         public Label timeStamp = new Label();
+
+        public Button manyCycle;
+        public Button background;
 
         public Form1()
         {
@@ -67,12 +71,14 @@ namespace MiceSimulator
             Size buttonSize = new Size(200, 50);
 
             Button oneCycle = new Button();
-            Button manyCycle = new Button();
+            manyCycle = new Button();
             Button statistics = new Button();
+            background = new Button();
 
             oneCycle.Location = new Point(this.Size.Width - 250, this.Size.Height - 75);
             manyCycle.Location = new Point(this.Size.Width - 250, this.Size.Height - 175);
             statistics.Location = new Point(this.Size.Width - 250, this.Size.Height - 275);
+            background.Location = new Point(this.Size.Width - 250, 20);
 
             Label mouseAlive = new Label();
             Label predatorCount = new Label();
@@ -81,9 +87,11 @@ namespace MiceSimulator
             oneCycle.Text = "Step";
             manyCycle.Text = "Go";
             statistics.Text = "Stats";
+            background.Text = "Turn into real environment";
             oneCycle.Size = buttonSize;
             manyCycle.Size = buttonSize;
             statistics.Size = buttonSize;
+            background.Size = buttonSize;
             timeStamp.ForeColor = Color.Red;
             timeStamp.Font = new Font("Arial", 25, FontStyle.Regular);
             timeStamp.AutoSize = true;
@@ -91,15 +99,18 @@ namespace MiceSimulator
             oneCycle.BackColor = Color.DarkGray;
             manyCycle.BackColor = Color.DarkGray;
             statistics.BackColor = Color.DarkGray;
+            background.BackColor = Color.DarkGray;
 
             Controls.Add(oneCycle);
             Controls.Add(manyCycle);
             Controls.Add(timeStamp);
             Controls.Add(statistics);
+            Controls.Add(background);
 
             oneCycle.Click += new EventHandler(OneCycle);
             manyCycle.Click += new EventHandler(ManyCycle);
             statistics.Click += new EventHandler(openStatistics);
+            background.Click += new EventHandler(changeBackground);
 
             this.Paint += paintForm;
             this.KeyDown += new KeyEventHandler(buttonPress);
@@ -198,6 +209,22 @@ namespace MiceSimulator
             "\n procreationDeathsBlack: " + procreationDeathsBlack.ToString());
         }
 
+        public void changeBackground(object sender, EventArgs e)
+        {
+            stealth = !stealth;
+
+            if (stealth)
+            {
+                this.BackColor = Color.FromArgb(52, 47, 51);
+                background.Text = "Change into grass";
+            }
+            else 
+            {
+                this.BackColor = Color.Green;
+                background.Text = "Change into real environment";
+            }
+        }
+
         public void OneCycle(object sender, EventArgs e)
         {
             cycle();
@@ -207,6 +234,13 @@ namespace MiceSimulator
         public void ManyCycle(object sender, EventArgs e)
         {
             goOn = !goOn;
+
+            if (goOn)
+            {
+                manyCycle.Text = "Stop";
+            }
+            else manyCycle.Text = "Go";
+
             while(goOn)
             {
                 cycle();
