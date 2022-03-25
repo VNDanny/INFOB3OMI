@@ -12,28 +12,34 @@ namespace MiceSimulator
 {
     public partial class Form1 : Form
     {
-        public int hoDoMaMice = 20;
-        public int heDoMaMice = 20;
-        public int hoReMaMice = 40;
-        public int hoDoFeMice = 20;
-        public int heDoFeMice = 20;
-        public int hoReFeMice = 40;
+        public int hoDoMaMice = 50;
+        public int heDoMaMice = 50;
+        public int hoReMaMice = 50;
+        public int hoDoFeMice = 50;
+        public int heDoFeMice = 50;
+        public int hoReFeMice = 50;
         public int initialPredators = 10;
 
 
         public bool predatationON = true;
-        public int chanceOfPredatationLight = 80;
-        public int chanceOfPredatationDark = 60;
-
+        public int chanceOfPredatationLight = 40;
+        public int chanceOfPredatationDark = 25;
 
         public int offSpring = 4;
-        public int chanceOfProcreationLight = 100;
-        public int chanceOfProcreationDark = 20;
-        public int chanceofProcreationBoth = 50;
+        public int chanceOfProcreationLight = 90;
+        public int chanceOfProcreationDark = 40;
+        public int chanceofProcreationBoth = 70;
+
+        public int hoDoMaMiceCount = 0;
+        public int heDoMaMiceCount = 0;
+        public int hoReMaMiceCount = 0;
+        public int hoDoFeMiceCount = 0;
+        public int heDoFeMiceCount = 0;
+        public int hoReFeMiceCount = 0;
 
         public int breedingCount = 0;
-        public int predatationWhite = 0;
-        public int predatationBlack = 0;
+        public int predationWhite = 0;
+        public int predationBlack = 0;
         public int oldAgeWhite = 0;
         public int oldAgeBlack = 0;
         public int procreationDeathsWhite = 0;
@@ -199,14 +205,15 @@ namespace MiceSimulator
         public int oldAgeWhite = 0;
         public int oldAgeBlack = 0;
         public int procreationDeaths = 0; */
-        System.Windows.Forms.MessageBox.Show(
-            "Breeding Count: " + breedingCount.ToString() + 
-            "\npredatationWhite: " + predatationWhite.ToString() + 
-            "\npredatationBlack: " + predatationBlack.ToString() + 
-            "\n oldAgeWhite: " + oldAgeWhite.ToString() + 
-            "\n oldAgeBlack: " + oldAgeBlack.ToString() + 
-            "\n procreationDeathsWhite: " + procreationDeathsWhite.ToString() + 
-            "\n procreationDeathsBlack: " + procreationDeathsBlack.ToString());
+            System.Windows.Forms.MessageBox.Show(
+                "Breeding Count: " + breedingCount.ToString() +
+                "\npredatationWhite: " + predationWhite.ToString() +
+                "\npredatationBlack: " + predationBlack.ToString() +
+                "\n oldAgeWhite: " + oldAgeWhite.ToString() +
+                "\n oldAgeBlack: " + oldAgeBlack.ToString() +
+                "\n procreationDeathsWhite: " + procreationDeathsWhite.ToString() +
+                "\n procreationDeathsBlack: " + procreationDeathsBlack.ToString() +
+                "\n" + miceCountResult());
         }
 
         public void changeBackground(object sender, EventArgs e)
@@ -300,27 +307,18 @@ namespace MiceSimulator
         }
 
         public void predationPhase()
-        {
-            foreach(Predator p in predators)
+        {   
+           for (int i = mice.Count - 1; i >= 0; i--)
             {
-                for (int i = mice.Count - 1; i >= 0; i--)
+                if (predation(mice[i]))
                 {
-                    double distance = Math.Sqrt((Math.Pow(p.position.X - mice[i].position.X, 2) + Math.Pow(p.position.Y - mice[i].position.Y, 2)));
-                    if (distance <= 50)
+                    if (mice[i].genoType[0] == 'A')
                     {
-                        if (predation(mice[i]))
-                        {
-                            if (mice[i].genoType[0] == 'A')
-                            {
-                                predatationBlack++;
-                            }
-                            else
-                            {
-                                predatationWhite++;
-                            }
-                            mice.Remove(mice[i]);
-                        }
+                        predationBlack++;
                     }
+                    else predationWhite++;
+
+                    mice.RemoveAt(i);
                 }
             }
             //predators check if mice near.
@@ -334,7 +332,7 @@ namespace MiceSimulator
             bool success;
             for (int i = mice.Count - 1; i >= 0; i--)
             {
-                if (!mice[i].gender && mice[i].age > 3)
+                if (!mice[i].gender)
                 {
                     partner = findEncounter(mice[i]);
                     if (partner != null)
@@ -387,16 +385,25 @@ namespace MiceSimulator
 
         public Mouse findEncounter(Mouse mouse)
         {
+            Mouse last = null;
+            int maleCount = 0;
             foreach (Mouse m in mice)
             {
-                if (m.gender && m.age > 3)
+                if (m.gender)
                 {
                     double distance = Math.Sqrt((Math.Pow(mouse.position.X - m.position.X, 2) + Math.Pow(mouse.position.Y - m.position.Y, 2)));
-                    if (distance <= 50)
-                        return m;
+                    if (distance <= 75)
+                    {
+                        maleCount++;
+                        last = m;
+                        if (maleCount > 10)
+                        {
+                            return null;
+                        }
+                    }
                 }
             }
-            return null;
+            return last;
         }
 
         public bool breeding(int breedingChance) //calculate breeding chance, return true when breeding, false if not.
@@ -443,7 +450,8 @@ namespace MiceSimulator
                     secondAllele = firstAllele;
                     firstAllele = 'A';
                 }
-                genoType = new string(firstAllele, secondAllele);
+                char[] Alleles = { firstAllele, secondAllele };
+                genoType = new string(Alleles);
 
                 newMouse = new Mouse(gender, genoType, mouse1.position);
 
@@ -492,6 +500,39 @@ namespace MiceSimulator
             {
                 return false;
             }
+        }
+
+        public string miceCountResult()
+        {
+            int hoDoMa = 0;
+            int heDoMa = 0;
+            int hoReMa = 0;
+            int hoDoFe = 0;
+            int heDoFe = 0;
+            int hoReFe = 0;
+            foreach(Mouse m in mice)
+            {
+                if (m.gender && m.genoType == "AA")
+                    hoDoMa++;
+                else if (m.gender && m.genoType == "Aa")
+                    heDoMa++;
+                else if (m.gender && m.genoType == "aa")
+                    hoReMa++;
+                else if (!m.gender && m.genoType == "AA")
+                    hoDoFe++;
+                else if (!m.gender && m.genoType == "Aa")
+                    heDoFe++;
+                else if (!m.gender && m.genoType == "aa")
+                    hoReFe++;
+            }
+            return hoDoMa.ToString() + " hoDoMa. \n" +
+                   heDoMa.ToString() + " heDoMa. \n" +
+                   hoReMa.ToString() + " hoReMa. \n" +
+                   hoDoFe.ToString() + " hoDoFe. \n" +
+                   heDoFe.ToString() + " heDoFe. \n" +
+                   hoReFe.ToString() + " hoReFe. ";
+
+
         }
     }
 }
