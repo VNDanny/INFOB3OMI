@@ -12,12 +12,12 @@ namespace MiceSimulator
 {
     public partial class Form1 : Form
     {
-        public int hoDoMaMice = 50;
-        public int heDoMaMice = 50;
-        public int hoReMaMice = 50;
-        public int hoDoFeMice = 50;
-        public int heDoFeMice = 50;
-        public int hoReFeMice = 50;
+        public int hoDoMaMice = 40;
+        public int heDoMaMice = 40;
+        public int hoReMaMice = 40;
+        public int hoDoFeMice = 40;
+        public int heDoFeMice = 40;
+        public int hoReFeMice = 40;
         public int initialPredators = 10;
 
 
@@ -26,9 +26,9 @@ namespace MiceSimulator
         public int chanceOfPredatationDark = 25;
 
         public int offSpring = 4;
-        public int chanceOfProcreationLight = 90;
+        public int chanceOfProcreationLight = 100;
         public int chanceOfProcreationDark = 40;
-        public int chanceofProcreationBoth = 70;
+        public int chanceofProcreationBoth = 90;
 
         public int hoDoMaMiceCount = 0;
         public int heDoMaMiceCount = 0;
@@ -240,6 +240,7 @@ namespace MiceSimulator
 
         public void ManyCycle(object sender, EventArgs e)
         {
+            /*
             goOn = !goOn;
 
             if (goOn)
@@ -255,6 +256,13 @@ namespace MiceSimulator
                 Application.DoEvents();
                 System.Threading.Thread.Sleep(1000);
             }
+            */
+
+            for(int i =0; i<10; i++)
+            {
+                cycle();
+            }
+            this.Invalidate();
             
         }
 
@@ -347,7 +355,7 @@ namespace MiceSimulator
                         }
                         else
                         {
-                            success = breeding(chanceOfProcreationLight);
+                            success = breeding(chanceofProcreationBoth);
                         }
 
 
@@ -396,6 +404,8 @@ namespace MiceSimulator
                     {
                         maleCount++;
                         last = m;
+                            
+
                         if (maleCount > 10)
                         {
                             return null;
@@ -525,12 +535,15 @@ namespace MiceSimulator
                 else if (!m.gender && m.genoType == "aa")
                     hoReFe++;
             }
-            return hoDoMa.ToString() + " hoDoMa. \n" +
+            return (hoDoMa + hoDoFe).ToString() + " hoDo\n" +
+                   (heDoMa + heDoFe).ToString() + " He\n" +
+                   (hoReMa + hoReFe).ToString() + " hoRe";
+                /*hoDoMa.ToString() + " hoDoMa. \n" +
                    heDoMa.ToString() + " heDoMa. \n" +
                    hoReMa.ToString() + " hoReMa. \n" +
                    hoDoFe.ToString() + " hoDoFe. \n" +
                    heDoFe.ToString() + " heDoFe. \n" +
-                   hoReFe.ToString() + " hoReFe. ";
+                   hoReFe.ToString() + " hoReFe. ";*/
 
 
         }
